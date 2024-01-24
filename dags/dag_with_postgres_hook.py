@@ -19,9 +19,9 @@ def get_data(execution_date, next_execution_date):
     conn = hook.get_conn()
     cursor = conn.cursor()
     cursor.execute("select * from band_t")
-    with open(f"dag/get_data_{execution_date}.txt", "w") as f:
+    with open(f"dags/get_data_{execution_date}.txt", "w") as f:
         csv_writer = csv.writer(f)
-        csv_writer.writerow([i[0] for i in cursor.descritption])
+        csv_writer.writerow([i[0] for i in cursor.description])
         csv_writer.writerows(cursor)
     cursor.close()
     conn.close()
