@@ -6,6 +6,7 @@ from airflow.utils.task_group import TaskGroup
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 import csv
 import logging
+import os
 
 
 
@@ -34,7 +35,8 @@ def load_src_data(tbl_dict: dict):
         conn = hook.get_conn()
         cursor = conn.cursor()
         cursor.execute(sql)
-        with open(f'src_data_{v}.csv', 'w', newline='') as csv_file:
+        export_path = "{}/src_data_{}.csv".format(os.getcwd(), v)
+        with open(export_path, 'w', newline='') as csv_file:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow([i[0] for i in cursor.description])
             csv_writer.writerows(cursor)
