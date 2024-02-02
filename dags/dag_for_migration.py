@@ -35,7 +35,7 @@ def load_src_data(tbl_dict: dict):
         cursor = conn.cursor()
         cursor.execute(sql)
         
-        exp_dir = "{}/exp_dir".format(os.getcwd())
+        exp_dir = "{}/exp-dir".format(os.getcwd())
         if not os.path.isdir(exp_dir):
             print('Exporting directory not exist. Creating')
             os.mkdir(exp_dir)
