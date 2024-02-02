@@ -7,13 +7,12 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 import csv
 import logging
 import os
+import pathlib
 
 
 
 args = {
-    'owner': 'mikhailok',
-    'retries': 1,
-    'retry_delay': timedelta(minutes=1)
+    'owner': 'mikhailok'
 }
 
 
@@ -35,7 +34,12 @@ def load_src_data(tbl_dict: dict):
         conn = hook.get_conn()
         cursor = conn.cursor()
         cursor.execute(sql)
-        export_path = "{}/src_data_{}.csv".format(os.getcwd(), v)
+        
+        exp_dir = "{}/exp_dir".format(os.getcwd())
+        if not os.path.isdir(exp_dir):
+            print('Exporting directory not exist. Creating')
+            os.mkdir(exp_dir)
+        export_path = "{}/src_data_{}.csv".format(exp_dir, v)
         with open(export_path, 'w', newline='') as csv_file:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow([i[0] for i in cursor.description])
@@ -45,7 +49,7 @@ def load_src_data(tbl_dict: dict):
         logging.info(f"Saved data from table {v} in csv file")
 
 
-with DAG (dag_id='dag_for_work', default_args=args, start_date=datetime(2024, 1, 28), schedule_interval='@daily') as dag:
+with DAG (dag_id='dag_for_migration', default_args=args, start_date=datetime(2024, 2, 2), schedule_interval='@daily') as dag:
     with TaskGroup("extract_and_load", tooltip="Extract and load source data") as extract_load_src:
         src_tables = get_src_tables()
         load_tables = load_src_data(src_tables)
