@@ -49,7 +49,8 @@ def load_src_data(tbl_dict: dict):
         logging.info(f"Saved data from table {v} in csv file")
 
 
-with DAG (dag_id='dag_for_migration', default_args=args, start_date=datetime(2024, 2, 2), schedule_interval='@daily') as dag:
+# schedule's setting: crontab.guru
+with DAG (dag_id='dag_for_migration', default_args=args, start_date=datetime(2024, 2, 2), schedule_interval='*/30 * * * */1') as dag:
     with TaskGroup("extract_and_load", tooltip="Extract and load source data") as extract_load_src:
         src_tables = get_src_tables()
         load_tables = load_src_data(src_tables)
