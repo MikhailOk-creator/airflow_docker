@@ -7,7 +7,7 @@ services:
     env_file:
       - ./env_files/db1.env
     volumes:
-      - ./scripts/:/docker-entrypoint-initdb.d/
+      - ./scripts/init:/docker-entrypoint-initdb.d/
   database-2:
     container_name: database_copy
     image: postgres:15-alpine
@@ -15,3 +15,5 @@ services:
       - "5433:5432"
     env_file:
       - ./env_files/db2.env
+    volumes:
+      - ./scripts/init_2:/docker-entrypoint-initdb.d/

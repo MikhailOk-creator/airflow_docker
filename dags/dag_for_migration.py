@@ -27,7 +27,7 @@ def get_src_tables():
 
 
 @task()
-def load_src_data(tbl_dict: dict):
+def load_src_data(tbl_dict):
     for k, v in tbl_dict['table_name'].items():
         hook = PostgresHook(postgres_conn_id="orig_db")
         sql = f'SELECT * FROM {v}'
@@ -49,6 +49,24 @@ def load_src_data(tbl_dict: dict):
         logging.info(f"Saved data from table {v} in csv file")
 
 
+@task()
+def upload_data(tbl_dict):
+    for k, v in tbl_dict['table_name'].items():
+        hook = PostgresHook(postgres_conn_id="copy_db")
+        exp_dir = "{}/exp-dir".format(os.getcwd())
+        export_path = "{}/src_data_{}.csv".format(exp_dir, v)
+        sql = f"COPY {v} FROM '{export_path}' DELIMITER ',' CSV HEADER"
+        print(sql)
+
+        conn = hook.get_conn()
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        cursor.close()
+        conn.close()
+        logging.info(f"Saved data from table {v} in new table")
+        
+
+
 # schedule's setting: crontab.guru
 with DAG (dag_id='dag_for_migration', default_args=args, start_date=datetime(2024, 2, 2), schedule_interval='*/30 * * * */1') as dag:
     with TaskGroup("extract_and_load", tooltip="Extract and load source data") as extract_load_src:
@@ -56,5 +74,11 @@ with DAG (dag_id='dag_for_migration', default_args=args, start_date=datetime(202
         load_tables = load_src_data(src_tables)
 
         src_tables >> load_tables
+    
+    with TaskGroup("upload_data", tooltip="Upload data to copy database") as upload_src_data:
+        names_of_tables = get_src_tables()
+        upload_all_data = upload_data(names_of_tables)
 
-    extract_load_src
+        names_of_tables >> upload_all_data
+
+    extract_load_src >> upload_src_data
