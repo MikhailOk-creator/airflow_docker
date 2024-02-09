@@ -53,17 +53,21 @@ def load_src_data(tbl_dict):
 def upload_data(tbl_dict):
     for k, v in tbl_dict['table_name'].items():
         hook = PostgresHook(postgres_conn_id="copy_db")
-        exp_dir = "{}/exp-dir".format(os.getcwd())
-        export_path = "{}/src_data_{}.csv".format(exp_dir, v)
-        sql = f"COPY {v} FROM '{export_path}' DELIMITER ',' CSV HEADER"
-        print(sql)
+        try:
+            exp_dir = "{}/exp-dir".format(os.getcwd())
+            export_path = "{}/src_data_{}.csv".format(exp_dir, v)
+            sql = f"COPY {v} FROM '{export_path}' DELIMITER ',' CSV HEADER"
+            print(sql)
 
-        conn = hook.get_conn()
-        cursor = conn.cursor()
-        cursor.execute(sql)
-        cursor.close()
-        conn.close()
-        logging.info(f"Saved data from table {v} in new table")
+            conn = hook.get_conn()
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            cursor.close()
+            conn.close()
+            logging.info(f"Saved data from table {v} in new table")
+        except:
+            print("{}/exp-dir".format(os.getcwd()))
+            logging.info("Something wrong in path")
         
 
 
