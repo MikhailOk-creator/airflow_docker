@@ -1,0 +1,20 @@
+from datetime import datetime
+from airflow import DAG
+from airflow.models.dag import DAG
+from airflow.decorators import dag, task
+from airflow.operators.bash import BashOperator
+
+
+args = {
+    'owner': 'mikhailok'
+}
+
+
+#schedule's setting: crontab.guru
+with DAG (dag_id='dag_for_file', default_args=args, start_date=datetime(2024, 2, 12), schedule_interval='*/15 * * * *') as dag:
+    task_down = BashOperator(
+        task_id='download',
+        bash_command='cd /opt/airflow/dags && touch test.txt'
+    )
+
+    task_down
